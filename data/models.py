@@ -1,5 +1,5 @@
-# Python
 from django.db import models
+import pandas as pd
 import inspect
 
 
@@ -12,11 +12,25 @@ class UploadedFile(models.Model):
     def __str__(self):
         return self.original_name
 
-    def process_absorbance(self):
+    def absorbance_data_frame(self):
+        if not self.file or not hasattr(self.file, "path"):
+            raise ValueError("Soubor není dostupný na lokální cestě (self.file.path).")
+
+        column_names = ["Wave_nm", "Dark_counts", "Ref_counts", "Sample_counts", "Absorbance_AU"]
+
+        return pd.read_csv(
+            self.file.path,
+            sep=";",
+            skiprows=7,
+            header=None,
+            names=column_names,
+            engine="python",
+            encoding=encoding,
+        )
+
+    def process_absorbance(self, encoding: str = "utf-8"):
         pass
 
-    def process_ph(self):
-        pass
 
     @classmethod
     def get_process_method_choices(cls):
