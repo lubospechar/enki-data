@@ -6,7 +6,6 @@ import inspect
 import os
 
 
-
 class UploadedFile(models.Model):
     file = models.FileField(upload_to="upload/data/%Y/%m/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -110,6 +109,7 @@ class AbsorbanceProperties(models.Model):
             .annotate(avg_absorbance_au=models.Avg("absorbance_au"))
             .order_by("wave_nm_int")
         )
+
 
 
 

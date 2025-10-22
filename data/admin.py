@@ -35,12 +35,19 @@ class AbsorbanceLocalMaximumInline(admin.TabularInline):
 
 @admin.register(AbsorbanceProperties)
 class AbsorbancePropertiesAdmin(admin.ModelAdmin):
-    list_display = ("id", "sample", "wave_start", "wave_end", "data_points_link")
+    list_display = ("id", "sample", "wave_start", "wave_end", "data_points_link", 'clean_xlsx_link')
     list_select_related = ("sample",)
     search_fields = ("sample__name", "sample__uploaded_file__original_name")
     list_filter = (("sample", admin.RelatedOnlyFieldListFilter),)
     autocomplete_fields = ("sample",)
     inlines = [AbsorbanceLocalMaximumInline]
+
+    def clean_xlsx_link(self, obj):
+        url = reverse("absorbance_clean_xlsx", args=[obj.pk])
+        return format_html('<a class="button" href="{}">Stáhnout čistý XLSX</a>', url)
+
+    clean_xlsx_link.short_description = "Export"
+
 
     def data_points_link(self, obj):
         url = reverse("admin:data_absorbancedata_changelist")
