@@ -25,7 +25,6 @@ class UploadedFile(models.Model):
 
         result = super().save(*args, **kwargs)
 
-        # po potvrzení transakce spustíme zvolenou metodu zpracování
         if is_new and self.process_method:
             func = getattr(self, self.process_method, None)
             if callable(func):
