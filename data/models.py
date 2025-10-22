@@ -1,7 +1,10 @@
+from django.db.models.functions import Cast
 from django.db import models, transaction
+
 import pandas as pd
 import inspect
 import os
+
 
 
 class UploadedFile(models.Model):
@@ -95,10 +98,34 @@ class AbsorbanceProperties(models.Model):
     wave_start = models.FloatField(default=400.0)
     wave_end = models.FloatField(default=750.0)
 
+    def __str__(self):
+        return f"{self.sample.name} ({self.wave_start}-{self.wave_end})"
+
+    def clean_data(self):
+        return (
+            self.absorbancedata_set
+            .filter(wave_nm__gte=self.wave_start, wave_nm__lt=self.wave_end)
+            .annotate(wave_nm_int=Cast("wave_nm", models.IntegerField()))
+            .values("wave_nm_int")
+            .annotate(avg_absorbance_au=models.Avg("absorbance_au"))
+            .order_by("wave_nm_int")
+        )
+
+
+
 class AbsorbanceLocalMaximum(models.Model):
     absorbance_properties = models.ForeignKey(AbsorbanceProperties, on_delete=models.CASCADE)
     wave_start = models.FloatField()
     wave_end = models.FloatField()
+
+    def maximum(self):
+        return (self.absorbance_properties.clean_data()
+                .filter(wave_nm_int__gte=self.wave_start, wave_nm_int__lt=self.wave_end)
+                .order_by("-avg_absorbance_au")
+                .first()
+        )
+
+
 
 class AbsorbanceData(models.Model):
     absorbance_properties = models.ForeignKey(AbsorbanceProperties, on_delete=models.CASCADE)
