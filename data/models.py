@@ -12,7 +12,7 @@ class UploadedFile(models.Model):
     def __str__(self):
         return self.original_name
 
-    def absorbance_data_frame(self):
+    def absorbance_dataframe(self, encoding: str = "utf-8"):
         if not self.file or not hasattr(self.file, "path"):
             raise ValueError("Soubor není dostupný na lokální cestě (self.file.path).")
 
@@ -28,7 +28,7 @@ class UploadedFile(models.Model):
             encoding=encoding,
         )
 
-    def process_absorbance(self, encoding: str = "utf-8"):
+    def process_absorbance(self):
         pass
 
 
